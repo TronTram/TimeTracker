@@ -21,7 +21,7 @@ A focused time tracking application with Pomodoro technique support, built with 
 - **Language**: TypeScript 5+
 - **Styling**: Tailwind CSS 3.4+
 - **Database**: PostgreSQL with Prisma ORM
-- **Backend**: Supabase
+- **Backend**: Supabase (optional) or local PostgreSQL
 - **Authentication**: Clerk
 - **State Management**: Zustand
 - **Animations**: Framer Motion
@@ -34,7 +34,10 @@ A focused time tracking application with Pomodoro technique support, built with 
 ### Prerequisites
 
 - Node.js 18+ and npm
-- PostgreSQL database (or Supabase account)
+- Database: Choose one:
+  - Local PostgreSQL installation, OR
+  - Supabase account (free tier available), OR
+  - Docker (for containerized PostgreSQL)
 - Clerk account for authentication
 
 ### Installation
@@ -52,20 +55,42 @@ A focused time tracking application with Pomodoro technique support, built with 
 
 3. **Set up environment variables**
    ```bash
-   cp .env.example .env
+   cp .env.example .env.local
    ```
    
    Fill in your environment variables:
    - Database URL (PostgreSQL/Supabase)
    - Clerk authentication keys
-   - Supabase keys
+   - Supabase keys (optional, for enhanced features)
    - Other configuration values
 
 4. **Set up the database**
+   
+   **Choose one of these options:**
+   
+   **Option A: Local PostgreSQL (Recommended for development)**
    ```bash
-   npx prisma migrate dev
+   # Make sure PostgreSQL is running locally
+   createdb cursor_time_tracker
+   npx prisma db push
    npx prisma db seed
    ```
+   
+   **Option B: Supabase (Recommended for production)**
+   ```bash
+   # Create Supabase project and get DATABASE_URL
+   npx prisma db push
+   npx prisma db seed
+   ```
+   
+   **Option C: Docker PostgreSQL**
+   ```bash
+   docker-compose up -d  # Start PostgreSQL container
+   npx prisma db push
+   npx prisma db seed
+   ```
+   
+   📖 **Detailed setup guide**: See [DATABASE_SETUP.md](./DATABASE_SETUP.md) for complete instructions.
 
 5. **Start the development server**
    ```bash
