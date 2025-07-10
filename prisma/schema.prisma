@@ -1,0 +1,234 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Optional: for connection pooling (Supabase)
+}
+
+// User model for authentication and profile data
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  imageUrl  String?
+  clerkId   String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  preferences   UserPreferences?
+  projects      Project[]
+  timeSessions  TimeSession[]
+  tags          Tag[]
+  achievements  UserAchievement[]
+  streaks       Streak[]
+
+  @@map("users")
+}
+
+// User preferences and settings
+model UserPreferences {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Theme and UI preferences
+  theme String @default("system") // "light" | "dark" | "system"
+
+  // Pomodoro settings
+  pomodoroWorkDuration       Int @default(25) // minutes
+  pomodoroShortBreakDuration Int @default(5)  // minutes
+  pomodoroLongBreakDuration  Int @default(15) // minutes
+  pomodoroLongBreakInterval  Int @default(4)  // every N pomodoros
+
+  // Timer behavior
+  autoStartBreaks     Boolean @default(false)
+  autoStartPomodoros  Boolean @default(false)
+  soundEnabled        Boolean @default(true)
+  notificationsEnabled Boolean @default(true)
+
+  // Default settings
+  defaultProjectId String?
+  defaultProject   Project? @relation(fields: [defaultProjectId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_preferences")
+}
+
+// Projects for organizing time sessions
+model Project {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  color       String  @default("#3b82f6") // hex color
+  isArchived  Boolean @default(false)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relationships
+  timeSessions    TimeSession[]
+  userPreferences UserPreferences[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, isArchived])
+  @@map("projects")
+}
+
+// Time tracking sessions
+model TimeSession {
+  id          String   @id @default(cuid())
+  startTime   DateTime
+  endTime     DateTime?
+  duration    Int      @default(0) // in seconds
+  description String?
+
+  // Session type and categorization
+  isPomodoro  Boolean     @default(false)
+  sessionType SessionType @default(FOCUS)
+
+  // Relationships
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  tags String[] @default([]) // Array of tag names
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, sessionType])
+  @@index([userId, startTime])
+  @@index([projectId])
+  @@map("time_sessions")
+}
+
+// Tags for categorizing sessions
+model Tag {
+  id    String  @id @default(cuid())
+  name  String
+  color String? // optional hex color
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("tags")
+}
+
+// Achievement definitions
+model Achievement {
+  id          String           @id @default(cuid())
+  type        AchievementType  @unique
+  title       String
+  description String
+  iconName    String
+  category    AchievementCategory
+  maxProgress Int              @default(1)
+
+  // Relationships
+  userAchievements UserAchievement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("achievements")
+}
+
+// User's unlocked achievements
+model UserAchievement {
+  id           String   @id @default(cuid())
+  progress     Int      @default(0)
+  unlockedAt   DateTime?
+  
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+  @@map("user_achievements")
+}
+
+// User streaks for motivation
+model Streak {
+  id             String   @id @default(cuid())
+  currentStreak  Int      @default(0)
+  longestStreak  Int      @default(0)
+  lastActiveDate DateTime?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId])
+  @@map("streaks")
+}
+
+// Session types enum
+enum SessionType {
+  WORK
+  SHORT_BREAK
+  LONG_BREAK
+  FOCUS
+}
+
+// Achievement types enum
+enum AchievementType {
+  FIRST_SESSION
+  FIRST_HOUR
+  FIRST_DAY
+  FIRST_WEEK
+  MARATHON_SESSION
+  EARLY_BIRD
+  NIGHT_OWL
+  CONSISTENCY_CHAMPION
+  PROJECT_MASTER
+  FOCUS_MASTER
+  BREAK_MASTER
+  STREAK_7_DAYS
+  STREAK_30_DAYS
+  STREAK_100_DAYS
+  TOTAL_TIME_10_HOURS
+  TOTAL_TIME_100_HOURS
+  TOTAL_TIME_1000_HOURS
+  SESSIONS_100
+  SESSIONS_500
+  SESSIONS_1000
+  PROJECTS_10
+  PERFECT_WEEK
+}
+
+// Achievement categories enum
+enum AchievementCategory {
+  TIME
+  STREAK
+  PROJECT
+  FOCUS
+  SPECIAL
+}
