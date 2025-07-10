@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import { ToastContainer } from '@/components/ui/toast';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -20,6 +21,14 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico',
   },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+  },
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: 'white' },
+    { media: '(prefers-color-scheme: dark)', color: 'black' },
+  ],
 };
 
 export default function RootLayout({
@@ -33,6 +42,7 @@ export default function RootLayout({
         <div id="root" className="relative flex min-h-screen flex-col">
           <main className="flex-1">{children}</main>
         </div>
+        <ToastContainer position="top-right" />
       </body>
     </html>
   );
