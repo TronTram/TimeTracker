@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ToastContainer } from '@/components/ui/toast';
+// import { ClerkProvider } from '@clerk/nextjs'; // Temporarily disabled for UI testing
 
 const inter = Inter({
   subsets: ['latin'],
@@ -37,13 +38,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="min-h-screen bg-background font-sans antialiased">
-        <div id="root" className="relative flex min-h-screen flex-col">
-          <main className="flex-1">{children}</main>
-        </div>
-        <ToastContainer position="top-right" />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+        <body className="min-h-screen bg-background font-sans antialiased">
+          <div id="root" className="relative flex min-h-screen flex-col">
+            <main className="flex-1">{children}</main>
+          </div>
+          <ToastContainer position="top-right" />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
