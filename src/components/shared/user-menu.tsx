@@ -1,6 +1,7 @@
 'use client';
 
-import { useAuth } from '@/hooks/use-auth';
+import { useUser } from '@clerk/nextjs';
+import { SignOutButton } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -15,10 +16,10 @@ import {
 } from 'lucide-react';
 
 export function UserMenu() {
-  const { user, clerkUser, isLoading, signOut } = useAuth();
+  const { user, isLoaded } = useUser();
   const router = useRouter();
 
-  if (isLoading) {
+  if (!isLoaded) {
     return (
       <div className="flex items-center space-x-2">
         <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
@@ -27,7 +28,7 @@ export function UserMenu() {
     );
   }
 
-  if (!user || !clerkUser) {
+  if (!user) {
     return (
       <Button 
         onClick={() => router.push('/sign-in')}
@@ -44,12 +45,12 @@ export function UserMenu() {
       trigger={
         <Button variant="ghost" className="flex items-center space-x-2 px-2">
           <Avatar
-            src={clerkUser.imageUrl}
-            fallback={clerkUser.firstName?.[0] || clerkUser.emailAddresses[0]?.emailAddress[0] || 'U'}
+            src={user.imageUrl}
+            fallback={user.firstName?.[0] || user.emailAddresses[0]?.emailAddress[0] || 'U'}
             size="sm"
           />
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300 max-w-24 truncate">
-            {clerkUser.firstName || 'User'}
+            {user.firstName || 'User'}
           </span>
           <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
         </Button>
@@ -78,10 +79,12 @@ export function UserMenu() {
         Profile
       </DropdownItem>
       <DropdownSeparator />
-      <DropdownItem onClick={signOut} destructive>
-        <LogOut className="w-4 h-4 mr-2" />
-        Sign Out
-      </DropdownItem>
+      <SignOutButton>
+        <DropdownItem destructive>
+          <LogOut className="w-4 h-4 mr-2" />
+          Sign Out
+        </DropdownItem>
+      </SignOutButton>
     </Dropdown>
   );
 } 
