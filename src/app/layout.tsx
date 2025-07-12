@@ -51,7 +51,7 @@ export default function RootLayout({
             <div id="root" className="relative flex min-h-screen flex-col">
               <main className="flex-1">{children}</main>
             </div>
-            <ToastContainer position="top-right" />
+            <ToastContainer />
           </AuthProvider>
         </ThemeProvider>
       </body>
