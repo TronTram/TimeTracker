@@ -23,3 +23,9 @@
 │  /analytics     │                         
 │  /settings      │                         
 └─────────────────┘                         
+
+Users can seamlessly navigate between:
+
+Landing page ↔ Sign-in/Sign-up ↔ Dashboard
+Dashboard → Projects/Analytics/Settings
+Sign-up → Onboarding → Dashboard
