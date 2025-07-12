@@ -1,0 +1,14 @@
+sources:
+  my-pg-source:
+    kind: postgres
+    host: 127.0.0.1
+    port: 5432
+    database: time_tracker
+    user: myuser
+    password: mypassword
+tools:
+  get-all-projects:
+    kind: postgres-sql
+    source: my-pg-source
+    description: Get all projects.
+    statement: SELECT * FROM projects;
