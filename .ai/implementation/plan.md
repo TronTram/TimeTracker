@@ -89,12 +89,12 @@ Looking at this comprehensive Focus Timer specification, I'll break it down into
   - **Step Dependencies**: Step 2, Step 4
   - **User Instructions**: Set up Clerk account, configure authentication providers, test sign-up and sign-in flows
 
-- [ ] Step 6: User Profile and Preferences Management
+- [x] Step 6: User Profile and Preferences Management ✅
   - **Task**: Create user profile management, preferences settings, and onboarding flow for new users
   - **Files**: [9 files]
-    - `src/app/(dashboard)/settings/page.tsx`: User settings page with preferences form
-    - `src/components/features/auth/onboarding-flow.tsx`: Multi-step onboarding for new users
-    - `src/components/features/auth/preferences-form.tsx`: User preferences form with Pomodoro settings
+    - `src/app/settings/page.tsx`: User settings page with preferences form
+    - `src/components/onboarding/onboarding-flow.tsx`: Multi-step onboarding for new users
+    - `src/components/forms/user-preferences-form.tsx`: User preferences form with Pomodoro settings
     - `src/hooks/use-user-preferences.ts`: Hook for managing user preferences state
     - `src/actions/user-preferences-actions.ts`: Server actions for preferences CRUD operations
     - `src/types/user.ts`: User and preferences TypeScript interfaces
