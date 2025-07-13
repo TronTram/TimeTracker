@@ -35,16 +35,13 @@ if (supabaseUrl && supabaseAnonKey) {
 
 export const supabase = supabaseClient;
 export const supabaseAdmin = supabaseAdminClient;
-  ? createClient(supabaseUrl, supabaseServiceRoleKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    })
-  : null;
 
 // Helper functions for Supabase operations
 export async function checkSupabaseConnection() {
+  if (!supabase) {
+    return { status: 'not_configured', timestamp: new Date().toISOString() };
+  }
+  
   try {
     const { data, error } = await supabase
       .from('users')
@@ -115,6 +112,9 @@ export async function deleteFile(bucket: string, paths: string[]) {
 }
 
 export function getPublicUrl(bucket: string, path: string) {
+  if (!supabase) {
+    throw new Error('Supabase not configured');
+  }
   const { data } = supabase.storage.from(bucket).getPublicUrl(path);
   return data.publicUrl;
 }
@@ -129,6 +129,10 @@ export function subscribeToTable<T = any>(
   }) => void,
   filter?: string
 ) {
+  if (!supabase) {
+    throw new Error('Supabase not configured');
+  }
+  
   const channel = supabase.channel(`${table}_changes`);
   
   const subscription = channel
@@ -157,6 +161,10 @@ export function subscribeToTable<T = any>(
 
 // Authentication helpers (for integration with Clerk)
 export async function getSupabaseUser() {
+  if (!supabase) {
+    return null;
+  }
+  
   const { data: { user }, error } = await supabase.auth.getUser();
   
   if (error) {
@@ -169,6 +177,10 @@ export async function getSupabaseUser() {
 
 // Database health check using Supabase
 export async function checkDatabaseHealth() {
+  if (!supabase) {
+    return { status: 'not_configured', timestamp: new Date().toISOString() };
+  }
+  
   try {
     const { data, error } = await supabase
       .from('users')
