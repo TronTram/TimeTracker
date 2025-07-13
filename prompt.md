@@ -28,6 +28,9 @@ The project uses an organized documentation system in `.ai/`:
   - `step-03-database-schema.md` - Database and schema setup
   - `step-04-database-access-layer.md` - Server actions and data layer
   - `step-05-clerk-authentication.md` - Authentication integration
+  - `step-06-user-preferences.md` - User profile and preferences
+  - `step-07-timer-implementation.md` - Core timer engine
+  - `step-08-session-persistence.md` - Session management and persistence
   
 - **`architecture/`** - Technical decisions and system design
   - `decisions.md` - Architecture Decision Records (ADRs)
@@ -38,8 +41,8 @@ The project uses an organized documentation system in `.ai/`:
 - **`prompts/`** - AI interaction patterns and troubleshooting
 
 ## Current Status
-- **Progress**: 5/20 steps completed (25%)
-- **Next**: Step 6 - User Profile and Preferences Management
-- **Focus**: Authentication system is complete, moving to user management features
+- **Progress**: 8/20 steps completed (40%)
+- **Next**: Step 9 - Project Creation and Management
+- **Focus**: Session management system is complete, moving to project management features
 
 See `.ai/README.md` for complete documentation overview.
