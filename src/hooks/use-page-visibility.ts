@@ -21,7 +21,7 @@ export interface PageVisibilityCallbacks {
  */
 export function usePageVisibility(callbacks: PageVisibilityCallbacks = {}) {
   const [state, setState] = useState<PageVisibilityState>({
-    isVisible: !document.hidden,
+    isVisible: typeof document !== 'undefined' ? !document.hidden : true,
     wasHidden: false,
     hiddenTime: 0,
     lastVisibilityChange: null,
@@ -31,6 +31,8 @@ export function usePageVisibility(callbacks: PageVisibilityCallbacks = {}) {
   callbacksRef.current = callbacks;
 
   const handleVisibilityChange = useCallback(() => {
+    if (typeof document === 'undefined') return;
+    
     const isVisible = !document.hidden;
     const now = new Date();
     
@@ -64,6 +66,8 @@ export function usePageVisibility(callbacks: PageVisibilityCallbacks = {}) {
   }, []); // Remove callbacks dependency
 
   useEffect(() => {
+    if (typeof document === 'undefined' || typeof window === 'undefined') return;
+    
     // Set initial state
     setState(prevState => ({
       ...prevState,
@@ -162,6 +166,8 @@ export function useTabFocus() {
   const [isTabFocused, setIsTabFocused] = useState(true);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleFocus = () => setIsTabFocused(true);
     const handleBlur = () => setIsTabFocused(false);
 
