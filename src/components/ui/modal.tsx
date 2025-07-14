@@ -7,12 +7,12 @@ const modalVariants = cva(
   {
     variants: {
       size: {
-        sm: 'max-w-sm',
-        default: 'max-w-md',
-        lg: 'max-w-lg',
-        xl: 'max-w-xl',
-        '2xl': 'max-w-2xl',
-        full: 'max-w-full m-4',
+        sm: '',
+        default: '',
+        lg: '',
+        xl: '',
+        '2xl': '',
+        full: '',
       },
     },
     defaultVariants: {
@@ -98,6 +98,12 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
             ref={ref}
             className={cn(
               'relative w-full rounded-lg border bg-background p-6 shadow-lg animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2',
+              size === 'sm' && 'max-w-sm',
+              size === 'default' && 'max-w-md', 
+              size === 'lg' && 'max-w-lg',
+              size === 'xl' && 'max-w-xl',
+              size === '2xl' && 'max-w-2xl',
+              size === 'full' && 'max-w-full m-4',
               className
             )}
             {...props}
