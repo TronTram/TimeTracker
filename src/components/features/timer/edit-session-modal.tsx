@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/toast';
+import { TagInput } from '@/components/features/tags/tag-input';
 import { 
   Clock, 
   Calendar, 
@@ -57,7 +58,6 @@ export function EditSessionModal({
     sessionType: 'FOCUS',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [tagInput, setTagInput] = useState('');
 
   // Initialize form data when session changes
   useEffect(() => {
@@ -71,7 +71,6 @@ export function EditSessionModal({
         duration: session.duration,
         sessionType: session.sessionType,
       });
-      setTagInput('');
       setErrors({});
     }
   }, [session]);
@@ -165,37 +164,6 @@ export function EditSessionModal({
         description: 'Failed to update session. Please try again.',
         variant: 'destructive',
       });
-    }
-  };
-
-  // Handle tag operations
-  const addTag = (tag: string) => {
-    const trimmedTag = tag.trim().toLowerCase();
-    if (trimmedTag && !formData.tags.includes(trimmedTag)) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, trimmedTag],
-      }));
-    }
-    setTagInput('');
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove),
-    }));
-  };
-
-  const handleTagInputKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      addTag(tagInput);
-    } else if (e.key === 'Backspace' && !tagInput && formData.tags.length > 0) {
-      const lastTag = formData.tags[formData.tags.length - 1];
-      if (lastTag) {
-        removeTag(lastTag);
-      }
     }
   };
 
@@ -367,43 +335,13 @@ export function EditSessionModal({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {/* Existing Tags */}
-            {formData.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-3">
-                {formData.tags.map((tag, index) => (
-                  <Badge 
-                    key={index} 
-                    variant="secondary"
-                    className="flex items-center gap-1"
-                  >
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      className="ml-1 hover:text-red-500"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            )}
-
-            {/* Tag Input */}
-            <Input
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={handleTagInputKeyDown}
-              placeholder="Add tags (press Enter or comma to add)"
-              onBlur={() => {
-                if (tagInput.trim()) {
-                  addTag(tagInput);
-                }
-              }}
+            <TagInput
+              value={formData.tags}
+              onChange={(newTags) => setFormData(prev => ({ ...prev, tags: newTags }))}
+              placeholder="Add tags to categorize this session..."
+              maxTags={10}
+              allowCreate={true}
             />
-            <p className="text-xs text-gray-500 mt-1">
-              Press Enter or comma to add a tag
-            </p>
           </CardContent>
         </Card>
 
