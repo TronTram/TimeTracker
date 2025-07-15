@@ -1,5 +1,9 @@
+'use client';
+
 import { UserPreferencesForm } from '@/components/forms/user-preferences-form';
 import { PomodoroSettings } from '@/components/features/pomodoro/pomodoro-settings';
+import { AmbientSounds } from '@/components/features/audio/ambient-sounds';
+import { VolumeControlPanel } from '@/components/features/audio/volume-control';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -66,6 +70,24 @@ export default function SettingsPage() {
           </div>
           
           <PomodoroSettings />
+        </Card>
+
+        {/* Audio & Notifications */}
+        <Card className="p-6">
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold">Audio & Notifications</h2>
+            <p className="text-muted-foreground text-sm mt-1">
+              Customize your audio experience and notification preferences
+            </p>
+          </div>
+          
+          <div className="space-y-8">
+            {/* Volume Controls */}
+            <VolumeControlPanel />
+            
+            {/* Ambient Sounds */}
+            <AmbientSounds />
+          </div>
         </Card>
       </div>
 
