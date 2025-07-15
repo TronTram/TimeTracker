@@ -4,6 +4,7 @@ import { ZodError } from 'zod';
 // Base error class for application-specific errors
 export class AppError extends Error {
   public readonly statusCode: number;
+  public readonly code: string;
   public readonly isOperational: boolean;
   public readonly timestamp: Date;
   public readonly context?: Record<string, any>;
@@ -11,12 +12,14 @@ export class AppError extends Error {
   constructor(
     message: string,
     statusCode: number = 500,
+    code: string = 'INTERNAL_ERROR',
     isOperational: boolean = true,
     context?: Record<string, any>
   ) {
     super(message);
     this.name = this.constructor.name;
     this.statusCode = statusCode;
+    this.code = code;
     this.isOperational = isOperational;
     this.timestamp = new Date();
     this.context = context;
@@ -29,13 +32,13 @@ export class AppError extends Error {
 // Authentication and authorization errors
 export class AuthenticationError extends AppError {
   constructor(message: string = 'Authentication required') {
-    super(message, 401);
+    super(message, 401, 'AUTH_REQUIRED');
   }
 }
 
 export class AuthorizationError extends AppError {
   constructor(message: string = 'Insufficient permissions') {
-    super(message, 403);
+    super(message, 403, 'INSUFFICIENT_PERMISSIONS');
   }
 }
 
@@ -44,7 +47,7 @@ export class ValidationError extends AppError {
   public readonly errors: Record<string, string[]>;
 
   constructor(message: string, errors: Record<string, string[]> = {}) {
-    super(message, 400);
+    super(message, 400, 'VALIDATION_ERROR');
     this.errors = errors;
   }
 
@@ -69,14 +72,14 @@ export class NotFoundError extends AppError {
     const message = identifier 
       ? `${resource} with identifier '${identifier}' not found`
       : `${resource} not found`;
-    super(message, 404);
+    super(message, 404, 'NOT_FOUND');
   }
 }
 
 // Conflict errors (e.g., duplicate resources)
 export class ConflictError extends AppError {
   constructor(message: string) {
-    super(message, 409);
+    super(message, 409, 'CONFLICT');
   }
 }
 
@@ -85,7 +88,7 @@ export class RateLimitError extends AppError {
   public readonly retryAfter?: number;
 
   constructor(message: string = 'Rate limit exceeded', retryAfter?: number) {
-    super(message, 429);
+    super(message, 429, 'RATE_LIMIT_EXCEEDED');
     this.retryAfter = retryAfter;
   }
 }
@@ -93,7 +96,7 @@ export class RateLimitError extends AppError {
 // Database errors
 export class DatabaseError extends AppError {
   constructor(message: string, context?: Record<string, any>) {
-    super(message, 500, true, context);
+    super(message, 500, 'DATABASE_ERROR', true, context);
   }
 }
 
@@ -102,7 +105,7 @@ export class ExternalServiceError extends AppError {
   public readonly service: string;
 
   constructor(service: string, message: string) {
-    super(`${service} service error: ${message}`, 502);
+    super(`${service} service error: ${message}`, 502, 'EXTERNAL_SERVICE_ERROR');
     this.service = service;
   }
 }

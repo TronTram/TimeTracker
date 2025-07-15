@@ -289,9 +289,8 @@ export class UserService {
 
   static async deleteUser(userId: string) {
     try {
-      return await prisma.user.update({
+      return await prisma.user.delete({
         where: { id: userId },
-        data: { deletedAt: new Date() },
       });
     } catch (error) {
       console.error('Delete user error:', error);

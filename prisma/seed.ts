@@ -287,7 +287,7 @@ async function main() {
       
       sessions.push({
         userId: demoUser.id,
-        projectId: project.id,
+        projectId: project?.id,
         startTime,
         endTime,
         duration,
