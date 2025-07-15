@@ -3,6 +3,9 @@
 import { useEffect, useCallback, useRef, useState } from 'react';
 import { usePomodoroStore, usePomodoroState, usePomodoroConfig } from '@/stores/pomodoro-store';
 import { usePageVisibility } from '@/hooks/use-page-visibility';
+import { useNotifications } from '@/hooks/use-notifications';
+import { useUserPreferences } from '@/hooks/use-user-preferences';
+import { audioService } from '@/services/audio-service';
 import { CyclePhase, PomodoroSession, PomodoroEvents } from '@/types/pomodoro';
 
 export interface UsePomodoroOptions {
@@ -100,6 +103,10 @@ export const usePomodoro = (options: UsePomodoroOptions = {}): UsePomodoroReturn
   } = usePomodoroStore();
 
   const config = usePomodoroConfig();
+  
+  // Notification and audio hooks
+  const { notifySessionComplete, notifyBreakStart, notifyPomodoroComplete } = useNotifications();
+  const { preferences } = useUserPreferences();
 
   // Timer state
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -140,6 +147,64 @@ export const usePomodoro = (options: UsePomodoroOptions = {}): UsePomodoroReturn
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }, []);
 
+  // Handle notifications and audio for phase transitions
+  const handlePhaseTransition = useCallback(async (
+    fromPhase: CyclePhase, 
+    toPhase: CyclePhase, 
+    duration: number
+  ) => {
+    const useNotifications = enableNotifications && preferences.notificationsEnabled;
+    const useSound = enableSound && preferences.soundEnabled;
+
+    // Play notification sound
+    if (useSound) {
+      try {
+        await audioService.playNotificationSound('success');
+      } catch (error) {
+        console.error('Error playing notification sound:', error);
+      }
+    }
+
+    // Show browser notifications
+    if (useNotifications) {
+      try {
+        if (fromPhase === 'work') {
+          // Work session completed
+          await notifySessionComplete('Work', duration);
+          
+          // Starting break
+          const breakType = toPhase === 'long-break' ? 'Long' : 'Short';
+          const breakDuration = toPhase === 'long-break' 
+            ? config.longBreakDuration 
+            : config.shortBreakDuration;
+          await notifyBreakStart(breakType, breakDuration * 60);
+        } else {
+          // Break completed
+          const breakType = fromPhase === 'long-break' ? 'Long Break' : 'Short Break';
+          await notifySessionComplete(breakType, duration);
+        }
+
+        // Check for Pomodoro completion (4 work sessions)
+        if (fromPhase === 'work' && currentCycle % 4 === 0) {
+          await notifyPomodoroComplete(Math.floor(currentCycle / 4));
+        }
+      } catch (error) {
+        console.error('Error showing notifications:', error);
+      }
+    }
+  }, [
+    enableNotifications,
+    enableSound,
+    preferences.notificationsEnabled,
+    preferences.soundEnabled,
+    notifySessionComplete,
+    notifyBreakStart,
+    notifyPomodoroComplete,
+    config.longBreakDuration,
+    config.shortBreakDuration,
+    currentCycle,
+  ]);
+
   // Timer tick function
   const tick = useCallback(() => {
     if (isActive && !isPaused && phaseStartTime) {
@@ -149,7 +214,12 @@ export const usePomodoro = (options: UsePomodoroOptions = {}): UsePomodoroReturn
 
       // Auto-complete when time is up
       if (elapsed >= phaseDurationSeconds && phaseDurationSeconds > 0) {
+        const previousPhase = currentPhase;
         completeCycle();
+        
+        // Handle notifications and audio for phase transition
+        handlePhaseTransition(previousPhase, nextPhase, elapsed);
+        
         if (onCycleComplete) {
           const session: PomodoroSession = {
             id: crypto.randomUUID(),
@@ -171,8 +241,10 @@ export const usePomodoro = (options: UsePomodoroOptions = {}): UsePomodoroReturn
     phaseStartTime,
     phaseDurationSeconds,
     completeCycle,
-    onCycleComplete,
     currentPhase,
+    nextPhase,
+    handlePhaseTransition,
+    onCycleComplete,
     currentCycle,
   ]);
 

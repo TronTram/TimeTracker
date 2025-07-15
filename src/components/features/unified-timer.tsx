@@ -8,6 +8,7 @@ import { TimerControls } from './timer/timer-controls';
 import { PomodoroTimer } from './pomodoro/pomodoro-timer';
 import { ConnectedPomodoroControls } from './pomodoro/connected-pomodoro-controls';
 import { CycleIndicator } from './pomodoro/cycle-indicator';
+import { AudioControls } from './audio/audio-controls';
 import { Card } from '@/components/ui/card';
 import { usePomodoroStore } from '@/stores/pomodoro-store';
 
@@ -99,6 +100,11 @@ export function UnifiedTimer({ className, onModeChange }: UnifiedTimerProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Audio Controls */}
+      <div className="mt-6">
+        <AudioControls compact className="flex justify-center" />
+      </div>
     </div>
   );
 }
