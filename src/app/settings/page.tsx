@@ -1,4 +1,5 @@
 import { UserPreferencesForm } from '@/components/forms/user-preferences-form';
+import { PomodoroSettings } from '@/components/features/pomodoro/pomodoro-settings';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,16 +43,31 @@ export default function SettingsPage() {
       </Card>
 
       {/* Settings Form */}
-      <Card className="p-6">
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold">User Preferences</h2>
-          <p className="text-muted-foreground text-sm mt-1">
-            Customize your experience with personalized settings
-          </p>
-        </div>
-        
-        <UserPreferencesForm />
-      </Card>
+      <div className="space-y-6">
+        {/* General Preferences */}
+        <Card className="p-6">
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold">General Preferences</h2>
+            <p className="text-muted-foreground text-sm mt-1">
+              Customize your general timer experience
+            </p>
+          </div>
+          
+          <UserPreferencesForm />
+        </Card>
+
+        {/* Pomodoro Settings */}
+        <Card className="p-6">
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold">Pomodoro Timer</h2>
+            <p className="text-muted-foreground text-sm mt-1">
+              Configure your Pomodoro timer settings and preferences
+            </p>
+          </div>
+          
+          <PomodoroSettings />
+        </Card>
+      </div>
 
       {/* Footer */}
       <div className="mt-8 text-center text-sm text-muted-foreground">

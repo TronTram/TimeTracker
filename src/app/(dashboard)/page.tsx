@@ -4,8 +4,8 @@ import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { TimerDisplay } from '@/components/features/timer/timer-display';
-import { TimerControls } from '@/components/features/timer/timer-controls';
+import { UnifiedTimer } from '@/components/features/unified-timer';
+import { PomodoroDashboard } from '@/components/features/pomodoro/pomodoro-dashboard';
 import { TimerProgress } from '@/components/features/timer/timer-progress';
 import { SessionSummary } from '@/components/features/timer/session-summary';
 import { useTimer } from '@/hooks/use-timer';
@@ -26,6 +26,7 @@ export default function DashboardHomePage() {
   } = useTimer();
   
   const [showSessionSummary, setShowSessionSummary] = useState(false);
+  const [timerMode, setTimerMode] = useState<'regular' | 'pomodoro'>('regular');
 
   useEffect(() => {
     if (isLoaded && !user) {
@@ -80,24 +81,8 @@ export default function DashboardHomePage() {
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Timer Section */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Main Timer Display */}
-          <Card className="p-8 text-center">
-            <TimerDisplay 
-              size="xl"
-              showSessionType={true}
-              showProgress={false}
-              showOvertime={true}
-            />
-            
-            <div className="mt-6">
-              <TimerControls 
-                size="lg"
-                showAdvanced={true}
-                showSessionSelector={true}
-                onSessionTypeSelect={(type) => console.log('Selected:', type)}
-              />
-            </div>
-          </Card>
+          {/* Unified Timer with Mode Toggle */}
+          <UnifiedTimer onModeChange={setTimerMode} />
 
           {/* Progress Indicator */}
           {(status === 'running' || status === 'paused') && (
@@ -127,74 +112,81 @@ export default function DashboardHomePage() {
 
         {/* Stats Sidebar */}
         <div className="space-y-6">
-          {/* Quick Stats */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Today's Stats</h2>
-            
-            <Card className="p-4">
-              <h3 className="text-sm font-medium text-muted-foreground mb-1">Current Session</h3>
-              <div className="text-2xl font-bold font-mono">
-                {status === 'idle' ? '--:--' : formattedTime}
+          {/* Show different sidebar based on timer mode */}
+          {timerMode === 'pomodoro' ? (
+            <PomodoroDashboard />
+          ) : (
+            <>
+              {/* Regular Timer Stats */}
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold">Today's Stats</h2>
+                
+                <Card className="p-4">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Current Session</h3>
+                  <div className="text-2xl font-bold font-mono">
+                    {status === 'idle' ? '--:--' : formattedTime}
+                  </div>
+                  {isOvertime && (
+                    <p className="text-xs text-orange-600 mt-1">Overtime session</p>
+                  )}
+                </Card>
+
+                <Card className="p-4">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Today's Focus</h3>
+                  <p className="text-2xl font-bold text-primary">0h 0m</p>
+                  <p className="text-xs text-muted-foreground">No sessions yet</p>
+                </Card>
+
+                <Card className="p-4">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">This Week</h3>
+                  <p className="text-2xl font-bold text-primary">0h 0m</p>
+                  <p className="text-xs text-muted-foreground">0 sessions</p>
+                </Card>
+
+                <Card className="p-4">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Projects</h3>
+                  <p className="text-2xl font-bold text-primary">0</p>
+                  <p className="text-xs text-muted-foreground">Create your first project</p>
+                </Card>
               </div>
-              {isOvertime && (
-                <p className="text-xs text-orange-600 mt-1">Overtime session</p>
+
+              {/* Quick Actions */}
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold">Quick Actions</h2>
+                <div className="space-y-2">
+                  <Link href="/projects" className="block">
+                    <Button variant="outline" className="w-full justify-start">
+                      Create Project
+                    </Button>
+                  </Link>
+                  <Link href="/analytics" className="block">
+                    <Button variant="outline" className="w-full justify-start">
+                      View Analytics
+                    </Button>
+                  </Link>
+                  <Link href="/settings" className="block">
+                    <Button variant="ghost" className="w-full justify-start">
+                      Timer Settings
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Session Progress Ring */}
+              {(status === 'running' || status === 'paused') && (
+                <Card className="p-4">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-4">Progress</h3>
+                  <div className="flex justify-center">
+                    <TimerProgress 
+                      variant="circular"
+                      size="md"
+                      showPercentage={true}
+                      sessionType={currentSession?.sessionType}
+                    />
+                  </div>
+                </Card>
               )}
-            </Card>
-
-            <Card className="p-4">
-              <h3 className="text-sm font-medium text-muted-foreground mb-1">Today's Focus</h3>
-              <p className="text-2xl font-bold text-primary">0h 0m</p>
-              <p className="text-xs text-muted-foreground">No sessions yet</p>
-            </Card>
-
-            <Card className="p-4">
-              <h3 className="text-sm font-medium text-muted-foreground mb-1">This Week</h3>
-              <p className="text-2xl font-bold text-primary">0h 0m</p>
-              <p className="text-xs text-muted-foreground">0 sessions</p>
-            </Card>
-
-            <Card className="p-4">
-              <h3 className="text-sm font-medium text-muted-foreground mb-1">Projects</h3>
-              <p className="text-2xl font-bold text-primary">0</p>
-              <p className="text-xs text-muted-foreground">Create your first project</p>
-            </Card>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Quick Actions</h2>
-            <div className="space-y-2">
-              <Link href="/projects" className="block">
-                <Button variant="outline" className="w-full justify-start">
-                  Create Project
-                </Button>
-              </Link>
-              <Link href="/analytics" className="block">
-                <Button variant="outline" className="w-full justify-start">
-                  View Analytics
-                </Button>
-              </Link>
-              <Link href="/settings" className="block">
-                <Button variant="ghost" className="w-full justify-start">
-                  Timer Settings
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          {/* Session Progress Ring */}
-          {(status === 'running' || status === 'paused') && (
-            <Card className="p-4">
-              <h3 className="text-sm font-medium text-muted-foreground mb-4">Progress</h3>
-              <div className="flex justify-center">
-                <TimerProgress 
-                  variant="circular"
-                  size="md"
-                  showPercentage={true}
-                  sessionType={currentSession?.sessionType}
-                />
-              </div>
-            </Card>
+            </>
           )}
         </div>
       </div>

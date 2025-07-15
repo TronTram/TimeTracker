@@ -84,6 +84,7 @@ export const AUDIO_FILES = {
 // Local storage keys
 export const STORAGE_KEYS = {
   TIMER_STATE: 'timer-state',
+  POMODORO_STATE: 'pomodoro-state',
   USER_PREFERENCES: 'user-preferences',
   CURRENT_SESSION: 'current-session',
   DRAFT_SESSION: 'draft-session',
