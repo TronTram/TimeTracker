@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePomodoroStore, usePomodoroState, usePomodoroProgress } from '@/stores/pomodoro-store';
 import { useTimer } from '@/hooks/use-timer';
@@ -58,8 +58,10 @@ export function PomodoroTimer({
   onCycleComplete,
 }: PomodoroTimerProps) {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [currentPhaseStartTime, setCurrentPhaseStartTime] = useState<Date | null>(null);
   const [phaseElapsedTime, setPhaseElapsedTime] = useState(0);
+  const [currentPhaseStartTime, setCurrentPhaseStartTime] = useState<Date | null>(null);
+  const autoStartedRef = useRef(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Pomodoro store
   const {
@@ -82,24 +84,45 @@ export function PomodoroTimer({
   const pomodoroState = usePomodoroState();
   const progress = usePomodoroProgress();
 
-  // Timer integration
-  const timer = useTimer({
-    onTick: (elapsed) => {
-      setPhaseElapsedTime(elapsed);
-    },
-    onSessionComplete: () => {
-      handlePhaseComplete();
-    },
-  });
-
   const currentConfig = phaseConfig[currentPhase as keyof typeof phaseConfig];
   const phaseDurationMinutes = getCurrentPhaseDuration();
   const phaseDurationSeconds = phaseDurationMinutes * 60;
   const remainingTime = Math.max(0, phaseDurationSeconds - phaseElapsedTime);
   const phaseProgress = phaseDurationSeconds > 0 ? (phaseElapsedTime / phaseDurationSeconds) * 100 : 0;
 
+  // Timer tick effect
+  useEffect(() => {
+    if (isTimerRunning && !isPaused) {
+      intervalRef.current = setInterval(() => {
+        setPhaseElapsedTime(prev => {
+          const newElapsed = prev + 1;
+          // Check if phase should complete
+          if (newElapsed >= phaseDurationSeconds) {
+            // Phase completed
+            setIsTimerRunning(false);
+            handlePhaseComplete();
+            return phaseDurationSeconds; // Cap at duration
+          }
+          return newElapsed;
+        });
+      }, 1000);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [isTimerRunning, isPaused, phaseDurationSeconds]);
+
   // Handle phase completion
-  const handlePhaseComplete = () => {
+  const handlePhaseComplete = useCallback(() => {
     completeCycle();
     
     if (onSessionComplete) {
@@ -116,22 +139,13 @@ export function PomodoroTimer({
       onSessionComplete(session);
     }
 
-    // Reset timer state for next phase
+    // Reset for next phase
     setPhaseElapsedTime(0);
     setCurrentPhaseStartTime(null);
-    setIsTimerRunning(false);
-
-    // Auto-start next phase if configured
-    if ((currentPhase === 'work' && config.autoStartBreaks) ||
-        (currentPhase !== 'work' && config.autoStartPomodoros)) {
-      setTimeout(() => {
-        handleStart();
-      }, 1000);
-    }
-  };
+  }, [completeCycle, onSessionComplete, currentPhase, phaseDurationSeconds, pomodoroState.currentCycle, projectId, description]);
 
   // Control handlers
-  const handleStart = () => {
+  const handleStart = useCallback(() => {
     if (!isActive && currentPhase === 'work') {
       startCycle();
     } else if (!isActive && currentPhase !== 'work') {
@@ -140,42 +154,40 @@ export function PomodoroTimer({
     
     setCurrentPhaseStartTime(new Date());
     setIsTimerRunning(true);
-    timer.start(currentPhase, projectId, description);
-  };
+  }, [isActive, currentPhase, startCycle, startBreak]);
 
-  const handlePause = () => {
+  const handlePause = useCallback(() => {
     pauseCycle();
     setIsTimerRunning(false);
-    timer.pause();
-  };
+  }, [pauseCycle]);
 
-  const handleResume = () => {
+  const handleResume = useCallback(() => {
     resumeCycle();
     setIsTimerRunning(true);
-    timer.resume();
-  };
+  }, [resumeCycle]);
 
-  const handleStop = () => {
+  const handleStop = useCallback(() => {
     resetCycle();
     setIsTimerRunning(false);
     setPhaseElapsedTime(0);
     setCurrentPhaseStartTime(null);
-    timer.stop();
-  };
+  }, [resetCycle]);
 
-  const handleSkip = () => {
+  const handleSkip = useCallback(() => {
     if (config.allowSkipBreaks || currentPhase === 'work') {
       skipCurrentPhase();
       setPhaseElapsedTime(0);
       setCurrentPhaseStartTime(null);
       setIsTimerRunning(false);
-      timer.stop();
     }
-  };
+  }, [config.allowSkipBreaks, currentPhase, skipCurrentPhase]);
 
-  const handleReset = () => {
-    handleStop();
-  };
+  const handleReset = useCallback(() => {
+    resetCycle();
+    setIsTimerRunning(false);
+    setPhaseElapsedTime(0);
+    setCurrentPhaseStartTime(null);
+  }, [resetCycle]);
 
   // Format time display
   const formatTime = (seconds: number): string => {
@@ -184,12 +196,27 @@ export function PomodoroTimer({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Auto-start if enabled
+  // Auto-start effect (only runs once when conditions are met)
   useEffect(() => {
-    if (autoStart && !isActive) {
-      handleStart();
+    if (autoStart && !isActive && !autoStartedRef.current && !isTimerRunning) {
+      autoStartedRef.current = true;
+      
+      // Start the cycle
+      if (currentPhase === 'work') {
+        startCycle();
+      } else {
+        startBreak(currentPhase);
+      }
+      
+      setCurrentPhaseStartTime(new Date());
+      setIsTimerRunning(true);
     }
-  }, [autoStart]);
+    
+    // Reset when autoStart is turned off
+    if (!autoStart) {
+      autoStartedRef.current = false;
+    }
+  }, [autoStart, isActive, isTimerRunning]); // Minimal dependencies
 
   return (
     <div className="w-full max-w-2xl mx-auto">
