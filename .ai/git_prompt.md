@@ -1,4 +1,4 @@
-As a meticulous Git expert and senior software engineer, I need your assistance to craft focused Git commits based on my current unstaged changes.
+Act as Git expert and senior software engineer, I need your assistance to craft focused Git commits based on my current unstaged changes.
 
 **Important**: Only include related files in one commit. If changes span multiple features or concerns, we should commit multiple times with logical groupings.
 
