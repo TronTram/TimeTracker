@@ -294,3 +294,80 @@ export function throttle<T extends (...args: any[]) => any>(
     }
   };
 }
+
+/**
+ * Format duration in seconds to human readable format
+ * @param seconds - Duration in seconds
+ * @returns Formatted duration string (e.g., "2h 30m", "45m", "30s")
+ */
+export function formatDuration(seconds: number): string {
+  const totalSeconds = Math.abs(Math.floor(seconds));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const secs = totalSeconds % 60;
+
+  if (hours > 0) {
+    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+  } else if (minutes > 0) {
+    return `${minutes}m`;
+  } else {
+    return `${secs}s`;
+  }
+}
+
+/**
+ * Get date range for analytics
+ * @param timeRange - Time range type
+ * @param startDate - Custom start date (optional)
+ * @param endDate - Custom end date (optional)
+ * @returns Object with start and end dates
+ */
+export function getDateRange(
+  timeRange: 'today' | 'week' | 'month' | 'year' | 'custom' = 'week',
+  startDate?: string,
+  endDate?: string
+): { start: Date; end: Date } {
+  const now = new Date();
+  let end = new Date(now);
+  let start = new Date(now);
+
+  switch (timeRange) {
+    case 'today':
+      start = getStartOfDay(now);
+      end = getEndOfDay(now);
+      break;
+    
+    case 'week':
+      // Get Monday of current week
+      const dayOfWeek = now.getDay();
+      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      start = new Date(now);
+      start.setDate(now.getDate() - daysToMonday);
+      start = getStartOfDay(start);
+      end = getEndOfDay(now);
+      break;
+    
+    case 'month':
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      start = getStartOfDay(start);
+      end = getEndOfDay(now);
+      break;
+    
+    case 'year':
+      start = new Date(now.getFullYear(), 0, 1);
+      start = getStartOfDay(start);
+      end = getEndOfDay(now);
+      break;
+    
+    case 'custom':
+      if (startDate) {
+        start = getStartOfDay(new Date(startDate));
+      }
+      if (endDate) {
+        end = getEndOfDay(new Date(endDate));
+      }
+      break;
+  }
+
+  return { start, end };
+}

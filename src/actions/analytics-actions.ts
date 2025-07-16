@@ -33,6 +33,7 @@ type ProjectAnalytics = {
   totalTime: number;
   sessionsCount: number;
   percentage: number;
+  averageSessionLength: number;
 };
 
 type TrendData = {
@@ -228,6 +229,7 @@ export async function getProjectBreakdown(params: AnalyticsParams = {}): Promise
     breakdown = Array.from(projectMap.values()).map((project: any) => ({
       ...project,
       percentage: totalTime > 0 ? (project.totalTime / totalTime) * 100 : 0,
+      averageSessionLength: project.sessionsCount > 0 ? project.totalTime / project.sessionsCount : 0,
     })).sort((a: any, b: any) => b.totalTime - a.totalTime);
     
     // Cache the result
