@@ -6,6 +6,7 @@ import { ToastContainer } from '@/components/ui/toast';
 import { AuthProvider } from '@/providers/auth-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { PWAInstaller } from '@/components/pwa/pwa-installer';
+import { ErrorBoundary } from '@/components/providers/error-boundary';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -63,20 +64,22 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body className={`${inter.variable} ${jetbrainsMono.variable} min-h-screen bg-background font-sans antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <AuthProvider>
-            <PWAInstaller />
-            <div id="root" className="relative flex min-h-screen flex-col">
-              <main className="flex-1">{children}</main>
-            </div>
-            <ToastContainer />
-          </AuthProvider>
-        </ThemeProvider>
+        <ErrorBoundary>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <AuthProvider>
+              <PWAInstaller />
+              <div id="root" className="relative flex min-h-screen flex-col">
+                <main className="flex-1">{children}</main>
+              </div>
+              <ToastContainer />
+            </AuthProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
