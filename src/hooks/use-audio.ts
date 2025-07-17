@@ -166,7 +166,7 @@ export function useAudio(): UseAudioReturn {
     ...audioState,
     notificationsEnabled: preferences.notificationsEnabled ?? false,
     soundEnabled: preferences.soundEnabled ?? false,
-    notificationPermission: 'Notification' in window ? Notification.permission : 'denied',
+    notificationPermission: typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'denied',
   };
 
   // Cleanup on unmount

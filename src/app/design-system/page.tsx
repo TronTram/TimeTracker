@@ -1,3 +1,5 @@
+'use client';
+
 import { 
   Button, 
   Card, 
@@ -11,8 +13,6 @@ import {
   Progress,
   CircularProgress,
   Skeleton,
-  Modal,
-  useToast,
 } from '@/components/ui';
 
 export default function DesignSystemPage() {
