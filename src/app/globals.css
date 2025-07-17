@@ -194,4 +194,98 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Mobile-specific optimizations */
+  @media (max-width: 767px) {
+    /* Optimize for mobile touch */
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Better mobile inputs */
+    input, textarea, select {
+      font-size: 16px; /* Prevent zoom on iOS */
+      border-radius: 0.5rem;
+    }
+    
+    /* Mobile-optimized focus styles */
+    .focus-mobile:focus {
+      @apply ring-2 ring-primary ring-offset-2 outline-none;
+    }
+    
+    /* Mobile typography adjustments */
+    .text-mobile-base {
+      font-size: clamp(0.875rem, 2.5vw, 1rem);
+    }
+    
+    .text-mobile-lg {
+      font-size: clamp(1rem, 3vw, 1.125rem);
+    }
+    
+    .text-mobile-xl {
+      font-size: clamp(1.125rem, 4vw, 1.25rem);
+    }
+    
+    /* Mobile spacing utilities */
+    .mobile-p-safe {
+      padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+    }
+    
+    /* Prevent overscroll bounce */
+    body {
+      overscroll-behavior: none;
+    }
+    
+    /* Mobile drawer shadows */
+    .mobile-drawer-shadow {
+      box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.12);
+    }
+  }
+
+  /* Touch device optimizations */
+  @media (hover: none) and (pointer: coarse) {
+    /* Larger touch targets */
+    button, a, [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    /* Remove hover effects on touch devices */
+    .hover\\:bg-accent:hover {
+      background-color: initial;
+    }
+    
+    /* Better active states for touch */
+    .touch-active:active {
+      transform: scale(0.98);
+      transition: transform 0.1s ease;
+    }
+  }
+
+  /* High DPI screen optimizations */
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+    /* Crisp rendering for icons and graphics */
+    .crisp-rendering {
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+  }
+
+  /* Dark mode mobile adjustments */
+  @media (max-width: 767px) {
+    .dark {
+      /* Better contrast for mobile dark mode */
+      --muted: 217.2 32.6% 20%;
+      --card: 222.2 84% 6%;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
