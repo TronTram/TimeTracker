@@ -46,3 +46,4 @@ If multiple logical groups are identified, organize them in order of dependency 
 4. **Documentation and configuration** (should go last)
 
 Each commit should be atomic and focused on a single concern or feature area.
+Each commit is focused, atomic, and represents a logical unit of functionality that can be reviewed and potentially reverted independently.
