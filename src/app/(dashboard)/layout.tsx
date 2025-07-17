@@ -1,5 +1,8 @@
+'use client';
+
 import { UserMenu } from '@/components/shared/user-menu';
 import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { MobileNavigation } from '@/components/layouts/mobile-navigation';
 import Link from 'next/link';
 
 export default function DashboardLayout({
@@ -10,7 +13,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-background">
       {/* Header Navigation */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center space-x-2">
@@ -29,10 +32,11 @@ export default function DashboardLayout({
                 />
               </svg>
             </div>
-            <span className="text-lg font-semibold">Time Tracker</span>
+            <span className="text-lg font-semibold hidden sm:block">Time Tracker</span>
+            <span className="text-lg font-semibold sm:hidden">TT</span>
           </Link>
 
-          {/* Navigation Links */}
+          {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link 
               href="/dashboard" 
@@ -61,7 +65,7 @@ export default function DashboardLayout({
           </nav>
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <ThemeToggle />
             <UserMenu />
           </div>
@@ -69,9 +73,14 @@ export default function DashboardLayout({
       </header>
 
       {/* Main Content */}
-      <main className="flex-1">
-        {children}
+      <main className="flex-1 pb-16 md:pb-0">
+        <div className="container mx-auto px-4 py-6">
+          {children}
+        </div>
       </main>
+
+      {/* Mobile Navigation */}
+      <MobileNavigation />
     </div>
   );
 }
