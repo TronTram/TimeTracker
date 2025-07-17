@@ -8,6 +8,8 @@ import { UnifiedTimer } from '@/components/features/unified-timer';
 import { PomodoroDashboard } from '@/components/features/pomodoro/pomodoro-dashboard';
 import { TimerProgress } from '@/components/features/timer/timer-progress';
 import { SessionSummary } from '@/components/features/timer/session-summary';
+import { StreakCounter } from '@/components/features/gamification/streak-counter';
+import { MotivationalQuotes } from '@/components/features/gamification/motivational-quotes';
 import { useTimer } from '@/hooks/use-timer';
 import { SessionType } from '@/types/timer';
 import { Card } from '@/components/ui/card';
@@ -117,6 +119,31 @@ export default function DashboardHomePage() {
             <PomodoroDashboard />
           ) : (
             <>
+              {/* Streak Counter */}
+              <StreakCounter
+                currentStreak={5}
+                longestStreak={12}
+                daysToNextMilestone={2}
+                nextMilestone={7}
+                streakPercentage={71}
+                lastActiveDate={new Date()}
+                className="w-full"
+              />
+
+              {/* Motivational Quote */}
+              <MotivationalQuotes
+                userStreak={5}
+                currentTimeOfDay={
+                  new Date().getHours() < 12 ? 'morning' : 
+                  new Date().getHours() < 18 ? 'afternoon' : 'evening'
+                }
+                userPreferences={{
+                  quotesEnabled: true,
+                  quoteCategory: 'focus',
+                }}
+                className="w-full"
+              />
+
               {/* Regular Timer Stats */}
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold">Today's Stats</h2>
