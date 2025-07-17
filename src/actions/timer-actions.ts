@@ -5,6 +5,7 @@ import { SessionService } from '@/services/database-service';
 import { CacheService } from '@/services/cache-service';
 import { requireDatabaseUser } from '@/lib/auth-helpers';
 import { TimeSessionSchema } from '@/lib/validations';
+import { triggerAchievementCheck } from '@/actions/achievement-actions';
 import type { ActionResult, PaginatedResponse } from '@/types/actions';
 import { TimeSession, SessionType } from '@prisma/client';
 import { AppError, ValidationError } from '@/lib/errors';
@@ -154,6 +155,14 @@ export async function stopTimerSession(sessionId: string, endTime?: Date): Promi
     // Clear caches
     CacheService.invalidateSessionData(user.clerkId, sessionId);
     
+    // Check for achievements after session completion
+    try {
+      await triggerAchievementCheck();
+    } catch (error) {
+      // Don't fail the session completion if achievement checking fails
+      console.error('Achievement check failed:', error);
+    }
+    
     // Revalidate pages
     revalidatePath('/dashboard');
     revalidatePath('/analytics');
@@ -191,6 +200,14 @@ export async function createManualSession(params: SessionCreateParams): Promise<
 
     // Clear caches
     CacheService.invalidateSessionData(user.clerkId);
+    
+    // Check for achievements after manual session creation
+    try {
+      await triggerAchievementCheck();
+    } catch (error) {
+      // Don't fail the session creation if achievement checking fails
+      console.error('Achievement check failed:', error);
+    }
     
     // Revalidate pages
     revalidatePath('/dashboard');
