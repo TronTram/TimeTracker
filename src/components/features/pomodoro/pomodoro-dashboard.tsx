@@ -32,20 +32,22 @@ export function PomodoroDashboard({ className }: PomodoroDashboardProps) {
 
   return (
     <div className={cn('space-y-6', className)}>
-      {/* Today's Progress */}
-      <Card className="p-6">
+      {/* Today's Goal */}
+      <Card className="p-6 bg-gradient-to-br from-card to-card/80">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Target className="w-5 h-5 text-red-500" />
-            <h3 className="text-lg font-semibold">Today's Goal</h3>
-          </div>
+          <h3 className="text-lg font-semibold">Today's Goal</h3>
           <div className="text-sm text-muted-foreground">
             {workSessionsToday} / {dailyGoal} sessions
           </div>
         </div>
         
         <div className="space-y-3">
-          <Progress value={todayProgress.percentage} className="h-3" />
+          <div className="w-full bg-muted rounded-full h-2">
+            <div 
+              className="bg-primary h-2 rounded-full transition-all duration-300" 
+              style={{ width: `${Math.min(100, todayProgress.percentage)}%` }}
+            />
+          </div>
           
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Progress</span>
@@ -67,22 +69,17 @@ export function PomodoroDashboard({ className }: PomodoroDashboardProps) {
         </div>
       </Card>
 
-      {/* Current Cycle Info */}
+      {/* Current Cycle */}
       <Card className="p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-5 h-5 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-            <div className="w-2 h-2 rounded-full bg-red-500" />
-          </div>
-          <h3 className="text-lg font-semibold">Current Cycle</h3>
-        </div>
+        <h3 className="text-lg font-semibold mb-4">Current Cycle</h3>
         
         <div className="grid grid-cols-2 gap-4">
-          <div className="text-center p-3 bg-muted/50 rounded-lg">
-            <div className="text-2xl font-bold text-red-600">{currentCycle}</div>
+          <div className="text-center p-4 bg-muted/50 rounded-lg">
+            <div className="text-3xl font-bold text-primary mb-1">{currentCycle}</div>
             <div className="text-sm text-muted-foreground">Current</div>
           </div>
-          <div className="text-center p-3 bg-muted/50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">{completedCycles}</div>
+          <div className="text-center p-4 bg-muted/50 rounded-lg">
+            <div className="text-3xl font-bold text-green-600 mb-1">{completedCycles}</div>
             <div className="text-sm text-muted-foreground">Completed</div>
           </div>
         </div>
@@ -109,48 +106,51 @@ export function PomodoroDashboard({ className }: PomodoroDashboardProps) {
                 />
               );
             })}
-            {completedCycles >= config.longBreakInterval && (
-              <motion.div
-                className="w-3 h-3 rounded-full bg-blue-500"
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-            )}
           </div>
         </div>
       </Card>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 gap-4">
         <Card className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-4 h-4 text-blue-500" />
-            <span className="text-sm font-medium">Completion Rate</span>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-muted-foreground">Completion Rate</div>
+              <div className="text-2xl font-bold">{completionRate}%</div>
+              <div className="text-xs text-muted-foreground">Last 30 days</div>
+            </div>
+            <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-blue-600" />
+            </div>
           </div>
-          <div className="text-2xl font-bold text-blue-600">{completionRate}%</div>
-          <div className="text-xs text-muted-foreground">Last 30 days</div>
         </Card>
 
         <Card className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Calendar className="w-4 h-4 text-orange-500" />
-            <span className="text-sm font-medium">Current Streak</span>
-          </div>
-          <div className="text-2xl font-bold text-orange-600">{currentStreak}</div>
-          <div className="text-xs text-muted-foreground">
-            {currentStreak === 1 ? 'day' : 'days'}
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-muted-foreground">Current Streak</div>
+              <div className="text-2xl font-bold">{currentStreak}</div>
+              <div className="text-xs text-muted-foreground">
+                {currentStreak === 1 ? 'day' : 'days'}
+              </div>
+            </div>
+            <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+              <Calendar className="w-6 h-6 text-orange-600" />
+            </div>
           </div>
         </Card>
       </div>
 
       {/* Quick Actions */}
       <Card className="p-4">
-        <h4 className="text-sm font-medium mb-3">Quick Actions</h4>
-        <div className="space-y-2">
-          <Button variant="outline" size="sm" className="w-full justify-start">
+        <h4 className="text-lg font-semibold mb-4">Quick Actions</h4>
+        <div className="space-y-3">
+          <Button variant="outline" className="w-full justify-start h-11">
+            <TrendingUp className="w-4 h-4 mr-2" />
             View Statistics
           </Button>
-          <Button variant="ghost" size="sm" className="w-full justify-start">
+          <Button variant="ghost" className="w-full justify-start h-11">
+            <Target className="w-4 h-4 mr-2" />
             Adjust Settings
           </Button>
         </div>

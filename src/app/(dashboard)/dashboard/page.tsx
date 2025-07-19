@@ -26,7 +26,7 @@ export default function DashboardPage() {
   } = useTimer();
   
   const [showSessionSummary, setShowSessionSummary] = useState(false);
-  const [timerMode, setTimerMode] = useState<'regular' | 'pomodoro'>('regular');
+  const [timerMode, setTimerMode] = useState<'regular' | 'pomodoro'>('pomodoro'); // Default to pomodoro to match design
 
   useEffect(() => {
     if (isLoaded && !user) {
@@ -68,137 +68,167 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">
-          Welcome back, {user.firstName || user.emailAddresses[0]?.emailAddress || 'User'}!
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Ready to track your productive time today?
-        </p>
-      </div>
-
-      <div className="grid gap-8 lg:grid-cols-3">
-        {/* Timer Section */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Unified Timer with Mode Toggle */}
-          <UnifiedTimer onModeChange={setTimerMode} />
-
-          {/* Progress Indicator */}
-          {(status === 'running' || status === 'paused') && (
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Session Progress</h3>
-              <TimerProgress 
-                variant="linear"
-                size="lg"
-                showPercentage={true}
-                sessionType={currentSession?.sessionType}
-              />
-            </Card>
-          )}
-
-          {/* Session Summary Modal */}
-          {showSessionSummary && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-              <SessionSummary
-                onClose={handleCloseSummary}
-                onStartNext={handleStartNext}
-                showActions={true}
-                showRecommendations={true}
-              />
-            </div>
-          )}
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Welcome back, {user.firstName || user.emailAddresses[0]?.emailAddress.split('@')[0] || 'User'}!
+          </h1>
+          <p className="text-muted-foreground">
+            Ready to track your productive time today?
+          </p>
         </div>
 
-        {/* Stats Sidebar */}
-        <div className="space-y-6">
-          {/* Show different sidebar based on timer mode */}
-          {timerMode === 'pomodoro' ? (
-            <PomodoroDashboard />
-          ) : (
-            <>
-              {/* Regular Timer Stats */}
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold">Today's Stats</h2>
-                
-                <Card className="p-4">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Current Session</h3>
-                  <div className="text-2xl font-bold font-mono">
-                    {status === 'idle' ? '--:--' : formattedTime}
-                  </div>
-                  {isOvertime && (
-                    <p className="text-xs text-orange-600 mt-1">Overtime session</p>
-                  )}
-                </Card>
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* Main Timer Section */}
+          <div className="lg:col-span-2">
+            <div className="grid gap-6">
+              {/* Unified Timer */}
+              <UnifiedTimer onModeChange={setTimerMode} />
 
-                <Card className="p-4">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Today's Focus</h3>
-                  <p className="text-2xl font-bold text-primary">0h 0m</p>
-                  <p className="text-xs text-muted-foreground">No sessions yet</p>
-                </Card>
-
-                <Card className="p-4">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">This Week</h3>
-                  <p className="text-2xl font-bold text-primary">0h 0m</p>
-                  <p className="text-xs text-muted-foreground">0 sessions</p>
-                </Card>
-
-                <Card className="p-4">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Projects</h3>
-                  <p className="text-2xl font-bold text-primary">0</p>
-                  <p className="text-xs text-muted-foreground">Create your first project</p>
-                </Card>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold">Quick Actions</h2>
-                <div className="space-y-2">
-                  <Link href="/projects" className="block">
-                    <Button variant="outline" className="w-full justify-start">
-                      Create Project
-                    </Button>
-                  </Link>
-                  <Link href="/analytics" className="block">
-                    <Button variant="outline" className="w-full justify-start">
-                      View Analytics
-                    </Button>
-                  </Link>
-                  <Link href="/settings" className="block">
-                    <Button variant="ghost" className="w-full justify-start">
-                      Timer Settings
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Session Progress Ring */}
+              {/* Session Progress */}
               {(status === 'running' || status === 'paused') && (
-                <Card className="p-4">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-4">Progress</h3>
-                  <div className="flex justify-center">
-                    <TimerProgress 
-                      variant="circular"
-                      size="md"
-                      showPercentage={true}
-                      sessionType={currentSession?.sessionType}
-                    />
+                <Card className="p-6 bg-gradient-to-r from-card to-card/80 border-l-4 border-l-primary">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold">Session Progress</h3>
+                    <div className="text-sm text-muted-foreground">
+                      {Math.round(progress)}% complete
+                    </div>
                   </div>
+                  <TimerProgress 
+                    variant="linear"
+                    size="lg"
+                    showPercentage={false}
+                    sessionType={currentSession?.sessionType}
+                  />
                 </Card>
               )}
-            </>
-          )}
-        </div>
-      </div>
 
-      {/* Recent Sessions */}
-      <div className="mt-12">
-        <h2 className="text-xl font-semibold mb-4">Recent Sessions</h2>
-        <Card className="p-6">
-          <p className="text-center text-muted-foreground py-8">
-            No time sessions yet. Start your first timer to see your activity here.
-          </p>
-        </Card>
+              {/* Recent Sessions */}
+              <Card className="p-6">
+                <h3 className="text-xl font-semibold mb-4">Recent Sessions</h3>
+                <div className="text-center text-muted-foreground py-8">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-lg font-medium mb-2">No time sessions yet</p>
+                  <p className="text-sm">Start your first timer to see your activity here.</p>
+                </div>
+              </Card>
+            </div>
+          </div>
+
+          {/* Stats Sidebar */}
+          <div className="space-y-6">
+            {timerMode === 'pomodoro' ? (
+              <PomodoroDashboard />
+            ) : (
+              <>
+                {/* Today's Goal */}
+                <Card className="p-6 bg-gradient-to-br from-card to-card/80">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold">Today's Goal</h3>
+                    <div className="text-sm text-muted-foreground">0 / 5 sessions</div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="text-sm text-muted-foreground">Progress</div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div className="bg-primary h-2 rounded-full" style={{ width: '0%' }}></div>
+                    </div>
+                    <div className="text-right text-sm font-medium">0%</div>
+                  </div>
+                </Card>
+
+                {/* Current Cycle */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Current Cycle</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-4 bg-muted/50 rounded-lg">
+                      <div className="text-3xl font-bold text-primary mb-1">0</div>
+                      <div className="text-sm text-muted-foreground">Current</div>
+                    </div>
+                    <div className="text-center p-4 bg-muted/50 rounded-lg">
+                      <div className="text-3xl font-bold text-green-600 mb-1">0</div>
+                      <div className="text-sm text-muted-foreground">Completed</div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-1 gap-4">
+                  <Card className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm text-muted-foreground">Completion Rate</div>
+                        <div className="text-2xl font-bold">0%</div>
+                        <div className="text-xs text-muted-foreground">Last 30 days</div>
+                      </div>
+                      <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm text-muted-foreground">Current Streak</div>
+                        <div className="text-2xl font-bold">0</div>
+                        <div className="text-xs text-muted-foreground">days</div>
+                      </div>
+                      <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                        <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Quick Actions */}
+                <Card className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+                  <div className="space-y-3">
+                    <Link href="/analytics" className="block">
+                      <Button variant="outline" className="w-full justify-start h-11">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        View Statistics
+                      </Button>
+                    </Link>
+                    <Link href="/settings" className="block">
+                      <Button variant="ghost" className="w-full justify-start h-11">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Adjust Settings
+                      </Button>
+                    </Link>
+                  </div>
+                </Card>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Session Summary Modal */}
+        {showSessionSummary && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <SessionSummary
+              onClose={handleCloseSummary}
+              onStartNext={handleStartNext}
+              showActions={true}
+              showRecommendations={true}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
