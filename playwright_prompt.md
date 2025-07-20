@@ -6,7 +6,7 @@ On the login page, execute the following two scenarios:
 
 Scenario 1: Valid Login
 
-Enter the email as "testuser@example.com" and the password as "aA12345!@#".
+Enter the email as "test@example.com" and the password as "aA12345!@#".
 Click the Login button.
 Verify that:
 The user is redirected to /inventory.html.
@@ -27,4 +27,4 @@ The following error message is displayed:
 ✅ After both scenarios are validated:
 
 Close the browser.
-At the same time Generate Python code using Playwright with MCP integration to
+At the same time Generate code using Playwright with MCP integration to execute the above scenario
