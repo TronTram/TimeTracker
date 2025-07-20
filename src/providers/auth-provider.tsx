@@ -13,6 +13,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   return (
     <ClerkProvider
+      signInFallbackRedirectUrl="/dashboard"
+      signUpFallbackRedirectUrl="/dashboard"
+      signInForceRedirectUrl="/dashboard"
       appearance={{
         baseTheme: theme === 'dark' ? dark : undefined,
         elements: {

@@ -10,21 +10,26 @@ const isProtectedRoute = createRouteMatcher([
   '/onboarding(.*)',
 ]);
 
-export default clerkMiddleware((auth, req) => {
+export default clerkMiddleware(async (auth, req) => {
+  const { userId, sessionClaims, redirectToSignIn } = await auth();
+
   // Redirect authenticated users from auth pages to dashboard
-  if (auth().userId && (req.nextUrl.pathname.startsWith('/sign-in') || req.nextUrl.pathname.startsWith('/sign-up'))) {
+  if (userId && (req.nextUrl.pathname.startsWith('/sign-in') || req.nextUrl.pathname.startsWith('/sign-up'))) {
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
   // Redirect authenticated users from root to dashboard
-  if (auth().userId && req.nextUrl.pathname === '/') {
+  if (userId && req.nextUrl.pathname === '/') {
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
   // Protect dashboard routes
   if (isProtectedRoute(req)) {
-    auth().protect();
+    if (!userId) {
+      return redirectToSignIn({ returnBackUrl: req.url });
+    }
   }
+
   return NextResponse.next();
 });
 
